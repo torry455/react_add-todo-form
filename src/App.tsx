@@ -19,16 +19,22 @@ export const App = () => {
   const [titleError, setTitleError] = useState(false);
   const [userError, setUserError] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const trimmedTitle = title
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cleanTitle = e.target.value
       .replace(/[^a-zA-Zа-яА-ЯґҐєЄіІїЇ0-9 ]/g, '')
       .trim();
 
-    setTitle(trimmedTitle);
+    setTitle(cleanTitle);
 
-    const isTitleValid = trimmedTitle !== '';
+    if (titleError) {
+      setTitleError(false);
+    }
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const isTitleValid = title !== '';
     const isUserValid = userId !== '';
 
     setTitleError(!isTitleValid);
@@ -44,13 +50,13 @@ export const App = () => {
 
     const newTodo: Todo = {
       id: maxId + 1,
-      title: trimmedTitle,
+      title,
       userId: +userId,
       completed: false,
       user: selectedUser,
     };
 
-    setTodos([...todos, newTodo]);
+    setTodos(currentTodos => [...currentTodos, newTodo]);
     setTitle('');
     setUserId('');
   };
@@ -67,14 +73,7 @@ export const App = () => {
             data-cy="titleInput"
             placeholder="Enter title"
             value={title}
-            onChange={e => {
-              setTitle(
-                e.target.value.replace(/[^a-zA-Zа-яА-ЯґҐєЄіІїЇ0-9 ]/g, ''),
-              );
-              if (titleError) {
-                setTitleError(false);
-              }
-            }}
+            onChange={handleTitleChange}
           />
         </div>
         {titleError && <span className="error">Please enter a title</span>}
@@ -90,7 +89,7 @@ export const App = () => {
             }
           }}
         >
-          <option value="0">Choose a user</option>
+          <option value="">Choose a user</option>
           {users.map(user => (
             <option key={user.id} value={user.id}>
               {user.name}
